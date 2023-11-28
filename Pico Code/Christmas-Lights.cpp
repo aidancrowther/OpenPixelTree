@@ -50,14 +50,17 @@ void displayManagerOne(){
             for (uint16_t led = 0; led < LED_LENGTH_ONE; led++){
 
                 strip_one->setPixelColor(led, 
-                    (uint8_t) BUFFER[BUFFER_POINTER++], 
-                    (uint8_t) BUFFER[BUFFER_POINTER++], 
-                    (uint8_t) BUFFER[BUFFER_POINTER++]
+
+                    (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)], 
+                    (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)], 
+                    (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)]
+                    
                     );
 
             }
 
             strip_one->show();
+            printf("Draw string one\r\n");
             DMA_DONE_ONE = false;
             DRAW_FLAG_ONE = false;
 
@@ -73,15 +76,16 @@ void displayManagerTwo(){
 
         strip_two->setPixelColor(led, 
         
-            (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)], 
-            (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)], 
-            (uint8_t) BUFFER[(LED_LENGTH_ONE*3)+(BUFFER_POINTER++)]
+            (uint8_t) BUFFER[BUFFER_POINTER++], 
+            (uint8_t) BUFFER[BUFFER_POINTER++], 
+            (uint8_t) BUFFER[BUFFER_POINTER++]
 
         );
 
     }
 
     strip_two->show();
+    printf("Draw string two\r\n");
 }
 
 void init(){
@@ -128,6 +132,8 @@ void init(){
 
 void messageDone(){
 
+    printf("Message Done\r\n");
+
     dma_channel_wait_for_finish_blocking(0);
     DMA_DONE_ONE = true;
     DRAW_FLAG_ONE = true;
@@ -139,6 +145,8 @@ void messageDone(){
         );
 
     displayManagerTwo();
+
+    printf("parsed\n");
 
 }
 
@@ -174,6 +182,40 @@ int main() {
 
     gpio_set_irq_enabled_with_callback(TX_DONE, GPIO_IRQ_EDGE_RISE, true, &gpio_callback);
 
+    //printf("Ready!\r\n");
+
     while(true) sleep_ms(4);
+
+/*
+    printf("Reading from FIFO\r\n");
+    for (int i = 0; i < 18; ++i) {
+        uint8_t rxdata = pio_sm_get_blocking(pio, sm);
+        printf("%02x %s\n", rxdata);
+    }
+    printf("Done\r\n");
+*/
+
+    
+    //gpio_set_irq_enabled(serial_latch, GPIO_IRQ_EDGE_RISE, true);
+
+    //while(true);
+
+    /*LED_PIXEL test = {.RED = 128, .GREEN = 255, .BLUE = 128};
+
+    LED_BUFFER.push(test);
+    LED_BUFFER.push(test);
+
+    printf("Buffer size: %d\r\n", LED_BUFFER.size());
+
+    LED_PIXEL found = LED_BUFFER.front();
+    LED_BUFFER.pop();
+
+    printf("Buffer size: %d\r\n", LED_BUFFER.size());
+    printf("Values: %d %d %d\r\n", found.RED, found.GREEN, found.BLUE);
+
+    clearBuffer();
+    */
+
+    //while(true) draw(strip_one, strip_two);
 
 }
